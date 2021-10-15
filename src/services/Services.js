@@ -90,3 +90,25 @@ export const deleteUser = (idUsuario, body) => {
             });
     });
 };
+
+
+
+//--------------------------------------------------------listar roles
+export const obtenerRol = () => {
+    return new Promise((resolve, reject) => {
+        axios({
+            url: URL_MANU + '/rol',
+            method: 'Get',
+            headers: {
+                'Content-Type': 'application/json'
+            }//,
+            //data: JSON.stringify(encuesta)
+        })
+            .then(response => {
+                resolve(response);
+            })
+            .catch(error => {
+                reject('Failed al obtener la Encuesta');
+            });
+    });
+};

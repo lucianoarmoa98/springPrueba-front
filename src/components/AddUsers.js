@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Button, IconButton, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, withStyles } from '@material-ui/core';
-import { agregarUser, deleteUser, editarUser, obtenerUser } from '../services/Services';
+import { Button, FormLabel, IconButton, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, withStyles } from '@material-ui/core';
+import { agregarUser, deleteUser, editarUser, obtenerRol, obtenerUser } from '../services/Services';
 import { Edit, Save } from '@material-ui/icons';
 import { useStylesUser } from '../styles/EstilosCss';
+import { Autocomplete } from '@material-ui/lab';
 
 
 export default function AddUsers() {
@@ -12,18 +13,55 @@ export default function AddUsers() {
     const [agregarApellido, setAgregarApellido] = useState();
     const [agregarDepartamento, setAgregarDepartamento] = useState();
     const [openModal, setOpenModal] = useState(false);
-    const [usuarioSeleccionado, setUsuarioSeleccionado] = useState({ id: '', nombre: '', apellido: '', departamento: '' });
+    const [usuarioSeleccionado, setUsuarioSeleccionado] = useState({ id: '', nombre: '', apellido: '', departamento: '', rol: {} });
+    const [roles, setRoles] = useState();
+    //const [rolUnico, setRolUnico] = useState('');
     const classes = useStylesUser();
+
+
+    //----------------------------------------------editar rol, lista desplegable
+    const editarRol = (rol) => {
+        //setRolSeleccionado(rol);
+        setUsuarioSeleccionado((prevState) => ({
+            ...prevState,
+            ['rol']: rol
+        }))
+
+    }
+
+
+
+
+    //--------------------------------------------listar roles
+    const listarRoles = () => {
+        obtenerRol()
+            .then(data => {
+                if (!data.data.error) {
+                    setRoles(data.data);
+                    //console.log(data.data)
+                }
+            })
+            .catch(error => {
+                // TO DO
+                // Lanzar mensaje de Error...
+            });
+    }
+
+    console.log("usuario seleccionado");
+    console.log(usuarioSeleccionado);
+
 
 
     //-------------------------------------------seleccionar id a cambiar
     const seleccionarUsuario = (item, caso) => {
         setUsuarioSeleccionado(item);
-        (caso === 'Editar') && setOpenModal(true)
+        //setRolUnico(item.rol ? item.rol.nombre: '');
+        (caso === 'Editar') && setOpenModal(true);
+        listarRoles();
 
     }
-    console.log("presiono");
-    console.log(usuarioSeleccionado)
+
+
 
 
     const closeModal = () => {
@@ -39,7 +77,7 @@ export default function AddUsers() {
         body.nombre = agregarNombre;
         body.apellido = agregarApellido;
         body.departamento = agregarDepartamento;
-        console.log(body)
+
         if (enviar) {
             agregarUser(body)
                 .then(data => {
@@ -52,7 +90,7 @@ export default function AddUsers() {
                     // TO DO
                     // Lanzar mensaje de Error...
                 });
-                
+
             console.log("enviado...")
             setAgregarNombre('');
             setAgregarApellido('');
@@ -73,7 +111,6 @@ export default function AddUsers() {
             .then(data => {
                 if (!data.data.error) {
                     setDataUser(data.data);
-                    //console.log(data.data)
                 }
             })
             .catch(error => {
@@ -89,6 +126,7 @@ export default function AddUsers() {
             ...prevState,
             [name]: value
         }))
+        console.log("edito correctamente...")
         console.log(usuarioSeleccionado)
     }
 
@@ -106,8 +144,6 @@ export default function AddUsers() {
         // })
         // setDataUser(body);
 
-        console.log("ids seleccionar...");
-        console.log(idUsuario)
 
         editarUser(idUsuario, body)
             .then(data => {
@@ -138,8 +174,7 @@ export default function AddUsers() {
         // })
         // setDataUser(body);
 
-        console.log("ids seleccionar...");
-        console.log(idUsuario)
+        
 
         deleteUser(idUsuario, body)
             .then(data => {
@@ -156,8 +191,9 @@ export default function AddUsers() {
         setOpenModal(false)
     }
 
-    console.log(dataUser)
 
+    //console.log("rolunico");
+    //console.log(rolUnico)
 
     const bodyModal = (
         <div className={classes.centrado}>
@@ -183,6 +219,7 @@ export default function AddUsers() {
                 >
                     eliminar
                 </Button>
+
                 <h2>Detalles Usuarios</h2>
                 <div className={classes.listado}>
                     <TextField
@@ -206,6 +243,26 @@ export default function AddUsers() {
                         name="departamento"
                         value={usuarioSeleccionado.departamento}
                         onChange={edicionChange}
+                    />
+
+                    <TextField
+                        name="rol"
+                        value={usuarioSeleccionado.rol ? usuarioSeleccionado.rol.nombre : ''}
+                        //onChange={edicionChange}
+                    />
+
+
+                    <FormLabel component="legend" >Rol</FormLabel>
+                    <Autocomplete
+                        id="combo-box-demo"
+                        name="rol"
+                        options={roles}
+                        getOptionLabel={(option) => option.nombre}
+                        //inputValue={rolUnico}
+                        //onInputChange={(e)=> setRolUnico(e ? e.target.value: '')}
+                        onChange={(option, value) => editarRol(value)}
+                        //style={{ width: 200 }}
+                        renderInput={(params) => <TextField style={{ width: 200 }}    {...params} />}
                     />
                 </div>
             </div>
